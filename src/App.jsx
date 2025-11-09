@@ -1,171 +1,131 @@
-import React, { useState, useEffect } from "react";
-import Chat from "./components/Chat";
-import Admin from "./components/Admin";
-import { Line } from "react-chartjs-2";
-import "chart.js/auto";
+import React, { useState } from "react";
 
-// === Efficiency Widget (Live Updating Graph) ===
-function EfficiencyWidget() {
-  const [efficiencyData, setEfficiencyData] = useState([80, 82, 79, 85, 90, 88, 92]);
-  const [labels] = useState(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setEfficiencyData((prev) => {
-        const nextValue = prev[prev.length - 1] + (Math.random() * 4 - 2);
-        const newData = [...prev.slice(1), Math.max(70, Math.min(100, nextValue))];
-        return newData;
-      });
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: "Efficiency %",
-        data: efficiencyData,
-        borderColor: "#00b4d8",
-        backgroundColor: "rgba(0,180,216,0.2)",
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-      },
-    ],
-  };
-
-  const options = {
-    scales: {
-      y: { min: 70, max: 100, ticks: { stepSize: 5 } },
-    },
-    plugins: { legend: { display: false } },
-    responsive: true,
-    maintainAspectRatio: false,
-  };
-
-  return (
-    <div className="card">
-      <h3>Efficiency</h3>
-      <div style={{ height: "200px" }}>
-        <Line data={data} options={options} />
-      </div>
-    </div>
-  );
-}
-
-// === Resources Section (with localStorage persistence) ===
-function Resources() {
-  const defaultResources = [
-    { name: "Ford Service Info", url: "https://www.motorcraftservice.com/" },
-    { name: "ALLDATA Repair", url: "https://www.alldata.com/" },
-    { name: "Identifix", url: "https://www.identifix.com/" },
-    { name: "YouTube Auto Repair", url: "https://www.youtube.com/results?search_query=auto+repair" },
-  ];
-
-  const [resources, setResources] = useState(() => {
-    const saved = localStorage.getItem("resources");
-    return saved ? JSON.parse(saved) : defaultResources;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("resources", JSON.stringify(resources));
-  }, [resources]);
-
-  const addResource = () => {
-    const name = prompt("Enter resource name:");
-    const url = prompt("Enter resource URL (include https://):");
-    if (name && url) {
-      const newResources = [...resources, { name, url }];
-      setResources(newResources);
-      localStorage.setItem("resources", JSON.stringify(newResources));
-    }
-  };
-
-  const removeResource = (index) => {
-    if (window.confirm("Remove this resource?")) {
-      const updated = resources.filter((_, i) => i !== index);
-      setResources(updated);
-      localStorage.setItem("resources", JSON.stringify(updated));
-    }
-  };
-
-  return (
-    <div className="card">
-      <h3>Resources</h3>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {resources.map((r, i) => (
-          <li key={i} style={{ marginBottom: "6px" }}>
-            <a
-              href={r.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#00b4d8", textDecoration: "none" }}
-              onMouseOver={(e) => (e.target.style.textDecoration = "underline")}
-              onMouseOut={(e) => (e.target.style.textDecoration = "none")}
-            >
-              {r.name}
-            </a>
-            <button
-              onClick={() => removeResource(i)}
-              style={{
-                marginLeft: "8px",
-                background: "transparent",
-                border: "none",
-                color: "#888",
-                cursor: "pointer",
-              }}
-            >
-              ✕
-            </button>
-          </li>
-        ))}
-      </ul>
-      <button className="btn" onClick={addResource} style={{ marginTop: "8px" }}>
-        + Add Resource
-      </button>
-    </div>
-  );
-}
-
-// === Main App ===
 export default function App() {
-  const [active, setActive] = useState("performance");
+  const [resources, setResources] = useState([
+    { name: "Ford Login", url: "https://www.fmcdealer.dealerconnection.com/" },
+    { name: "Ford Service Manual", url: "https://www.motorcraftservice.com" },
+    { name: "Alldata Login", url: "https://my.alldata.com/" },
+  ]);
+
+  const [newResourceName, setNewResourceName] = useState("");
+  const [newResourceURL, setNewResourceURL] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
+
+  const addOrUpdateResource = () => {
+    if (!newResourceName.trim() || !newResourceURL.trim()) return;
+
+    if (editIndex !== null) {
+      const updated = [...resources];
+      updated[editIndex] = { name: newResourceName, url: newResourceURL };
+      setResources(updated);
+      setEditIndex(null);
+    } else {
+      setResources([
+        ...resources,
+        { name: newResourceName, url: newResourceURL },
+      ]);
+    }
+
+    setNewResourceName("");
+    setNewResourceURL("");
+  };
+
+  const editResource = (index) => {
+    setNewResourceName(resources[index].name);
+    setNewResourceURL(resources[index].url);
+    setEditIndex(index);
+  };
+
+  const deleteResource = (index) => {
+    const filtered = resources.filter((_, i) => i !== index);
+    setResources(filtered);
+  };
 
   return (
-    <div className="container">
-      <header className="header">
-        <h1>TechAI Assistant</h1>
-        <nav className="tabs">
-          <button className={active === "performance" ? "active" : ""} onClick={() => setActive("performance")}>
-            Performance
-          </button>
-          <button className={active === "repair" ? "active" : ""} onClick={() => setActive("repair")}>
-            Repair Videos
-          </button>
-          <button className={active === "chat" ? "active" : ""} onClick={() => setActive("chat")}>
-            Chat
-          </button>
-          <button className={active === "admin" ? "active" : ""} onClick={() => setActive("admin")}>
-            Admin
-          </button>
-          <button className={active === "resources" ? "active" : ""} onClick={() => setActive("resources")}>
-            Resources
-          </button>
-        </nav>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <header className="text-center mb-8">
+        <h1 className="text-3xl font-bold">Tech AI Assistant</h1>
+        <p className="text-gray-400">Smart tools for diagnostic efficiency</p>
       </header>
 
-      <main>
-        {active === "performance" && <EfficiencyWidget />}
-        {active === "repair" && (
-          <div className="card">
-            <h3>Repair Videos</h3>
-            <p>Coming soon: curated repair tutorials and guides.</p>
+      <main className="max-w-3xl mx-auto space-y-10">
+        {/* Multipoint Section */}
+        <section className="bg-gray-800 p-6 rounded-2xl shadow-md">
+          <h2 className="text-2xl font-semibold mb-3">Multipoint</h2>
+          <p className="text-gray-400 mb-4">
+            Access the Ford Professional Diagnostic Login below:
+          </p>
+          <a
+            href="https://app.fordpdl.com/12/login"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+              Ford PDL Login
+            </button>
+          </a>
+        </section>
+
+        {/* Resources Section */}
+        <section className="bg-gray-800 p-6 rounded-2xl shadow-md">
+          <h2 className="text-2xl font-semibold mb-4">Resources</h2>
+          <ul className="list-disc list-inside space-y-3 mb-6">
+            {resources.map((res, index) => (
+              <li key={index} className="flex flex-col sm:flex-row sm:items-center justify-between">
+                <a
+                  href={res.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  {res.name}
+                </a>
+                <div className="flex gap-2 mt-2 sm:mt-0">
+                  <button
+                    onClick={() => editResource(index)}
+                    className="bg-yellow-500 hover:bg-yellow-600 px-2 py-1 rounded text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteResource(index)}
+                    className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Add/Edit Resource Inputs */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              placeholder="Resource Name"
+              value={newResourceName}
+              onChange={(e) => setNewResourceName(e.target.value)}
+              className="bg-gray-700 text-white px-3 py-2 rounded-lg w-full sm:w-1/2"
+            />
+            <input
+              type="text"
+              placeholder="Resource URL"
+              value={newResourceURL}
+              onChange={(e) => setNewResourceURL(e.target.value)}
+              className="bg-gray-700 text-white px-3 py-2 rounded-lg w-full sm:w-1/2"
+            />
+            <button
+              onClick={addOrUpdateResource}
+              className={`${
+                editIndex !== null
+                  ? "bg-yellow-600 hover:bg-yellow-700"
+                  : "bg-green-600 hover:bg-green-700"
+              } px-4 py-2 rounded-lg w-full sm:w-auto`}
+            >
+              {editIndex !== null ? "Save Changes" : "+ Add Resource"}
+            </button>
           </div>
-        )}
-        {active === "chat" && <Chat />}
-        {active === "admin" && <Admin />}
-        {active === "resources" && <Resources />}
+        </section>
       </main>
     </div>
   );
