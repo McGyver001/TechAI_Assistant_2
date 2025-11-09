@@ -12,7 +12,7 @@ export default function App(){
     return (
       <div className="app-shell">
         <header className="header">
-          <div className="logo">FORD</div>
+          <div className="logo">Kunes</div>
           <div className="title">TechAI Assistant</div>
         </header>
         <div className="container">
@@ -51,7 +51,7 @@ export default function App(){
   return (
     <div className="app-shell">
       <header className="header">
-        <div className="logo">FORD</div>
+        <div className="logo">Kunes</div>
         <div className="title">TechAI Assistant</div>
       </header>
       <div className="container">
