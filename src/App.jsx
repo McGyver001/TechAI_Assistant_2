@@ -57,8 +57,8 @@ export default function App(){
       <div className="container">
         <div style={{display:'flex',gap:8,marginBottom:12}}>
           <div className="big-button" onClick={()=>setActive('performance')}>Performance</div>
-          <div className="big-button" onClick={()=>setActive('diagnostics')}>Search</div>
-          <div className="big-button" onClick={()=>setActive('resources')}>Repair Videos</div>
+          <div className="big-button" onClick={()=>setActive('diagnostics')}>Diagnostics</div>
+          <div className="big-button" onClick={()=>setActive('resources')}>Resources</div>
           <div className="big-button" onClick={()=>setActive('multipoint')}>Multipoint</div>
         </div>
 
