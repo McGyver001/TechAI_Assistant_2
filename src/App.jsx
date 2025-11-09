@@ -25,7 +25,7 @@ export default function App(){
 
           <div className="card">
             <div style={{display:'flex',flexDirection:'column',gap:10}}>
-              <div className="big-button">📊 Performance</div>
+              <div className="big-button">📊 Performance Coaching</div>
               <div className="big-button">🔍 Search for Solutions</div>
               <div className="big-button">💵 Create Quote</div>
             </div>
