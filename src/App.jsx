@@ -80,7 +80,7 @@ export default function App(){
         )}
 
         {active==='diagnostics' && <div className="card"><h3>Search</h3><p className="small">VIN, DTC, and service info.</p></div>}
-        {active==='resources' && <div className="card"><h3>Repair Videos</h3><p className="small">Third-party repair videos and training.</p></div>}
+        {active==='resources' && <div className="card"><h3>Resource Links</h3><p className="small">Third-party repair videos and training.</p></div>}
         {active==='multipoint' && <div className="card"><h3>Multipoint Inspection</h3><p className="small">Checklist items.</p></div>}
 
         <div style={{marginTop:12}}><h4 style={{marginBottom:8}}>Assistant</h4><Chat /></div>
