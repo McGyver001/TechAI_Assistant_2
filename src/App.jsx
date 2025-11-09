@@ -1,93 +1,142 @@
-import React, { useState } from 'react';
-import Chat from './components/Chat';
-import Admin from './components/Admin';
-import EfficiencySpark from './components/EfficiencySpark';
+import React, { useState, useEffect } from "react";
+import Chat from "./components/Chat";
+import Admin from "./components/Admin";
+import { Line } from "react-chartjs-2";
+import "chart.js/auto";
 
-export default function App(){
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [active, setActive] = useState('performance');
-  const perf = {eff: 10.4, dollars: 65.20};
+// === Efficiency Widget (Live Updating Graph) ===
+function EfficiencyWidget() {
+  const [efficiencyData, setEfficiencyData] = useState([80, 82, 79, 85, 90, 88, 92]);
+  const [labels, setLabels] = useState(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
 
-  if(!loggedIn){
-    return (
-      <div className="app-shell">
-        <header className="header">
-          <div className="logo">Kunes</div>
-          <div className="title">TechAI Assistant</div>
-        </header>
-        <div className="container">
-          <div className="card">
-            <h3>Login</h3>
-            <input className="input" placeholder="FMCDealer.com Username" />
-            <div style={{height:12}} />
-            <button className="btn" onClick={()=>setLoggedIn(true)}>Log In</button>
-          </div>
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setEfficiencyData((prev) => {
+        const nextValue = prev[prev.length - 1] + (Math.random() * 4 - 2);
+        const newData = [...prev.slice(1), Math.max(70, Math.min(100, nextValue))];
+        return newData;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
-          <div className="card">
-            <div style={{display:'flex',flexDirection:'column',gap:10}}>
-              <div className="big-button">📊 Performance Coaching</div>
-              <div className="big-button">🔍 Search for Solutions</div>
-              <div className="big-button">💵 Create Quote</div>
-            </div>
-          </div>
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Efficiency %",
+        data: efficiencyData,
+        borderColor: "#00b4d8",
+        backgroundColor: "rgba(0,180,216,0.2)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+      },
+    ],
+  };
 
-          <div className="card">
-            <div className="small">Efficiency</div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-              <div>
-                <div className="eff-large">{perf.eff}%</div>
-                <div className="small">Dollars per hour</div>
-                <div style={{fontWeight:700}}>${perf.dollars.toFixed(2)}</div>
-              </div>
-              <div><EfficiencySpark /></div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    )
-  }
+  const options = {
+    scales: {
+      y: { min: 70, max: 100, ticks: { stepSize: 5 } },
+    },
+    plugins: { legend: { display: false } },
+    responsive: true,
+    maintainAspectRatio: false,
+  };
 
   return (
-    <div className="app-shell">
-      <header className="header">
-        <div className="logo">Kunes</div>
-        <div className="title">TechAI Assistant</div>
-      </header>
-      <div className="container">
-        <div style={{display:'flex',gap:8,marginBottom:12}}>
-          <div className="big-button" onClick={()=>setActive('performance')}>Performance</div>
-          <div className="big-button" onClick={()=>setActive('diagnostics')}>Diagnostics</div>
-          <div className="big-button" onClick={()=>setActive('resources')}>Resources</div>
-          <div className="big-button" onClick={()=>setActive('multipoint')}>Multipoint</div>
-        </div>
+    <div className="card">
+      <h3>Efficiency</h3>
+      <div style={{ height: "200px" }}>
+        <Line data={data} options={options} />
+      </div>
+    </div>
+  );
+}
 
-        {active==='performance' && (
-          <div>
-            <div className="card">
-              <div className="small">Efficiency</div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                <div>
-                  <div className="eff-large">10.4%</div>
-                  <div className="small">Dollars per hour</div>
-                  <div style={{fontWeight:700}}>$65.20</div>
-                </div>
-                <div><EfficiencySpark /></div>
-              </div>
-            </div>
-            <div className="card"><h3>Summary</h3><p className="small">Dollars billed, jobs completed, and targets.</p></div>
+// === Resources Section ===
+function Resources() {
+  const [resources, setResources] = useState([
+    { name: "Ford Service Info", url: "https://www.motorcraftservice.com/" },
+    { name: "ALLDATA Repair", url: "https://www.alldata.com/" },
+    { name: "Identifix", url: "https://www.identifix.com/" },
+    { name: "YouTube Auto Repair", url: "https://www.youtube.com/results?search_query=auto+repair" },
+  ]);
+
+  const addResource = () => {
+    const name = prompt("Enter resource name:");
+    const url = prompt("Enter resource URL (include https://):");
+    if (name && url) setResources([...resources, { name, url }]);
+  };
+
+  return (
+    <div className="card">
+      <h3>Resources</h3>
+      <ul style={{ listStyle: "none", padding: 0 }}>
+        {resources.map((r, i) => (
+          <li key={i} style={{ marginBottom: "6px" }}>
+            <a
+              href={r.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "#00b4d8",
+                textDecoration: "none",
+              }}
+              onMouseOver={(e) => (e.target.style.textDecoration = "underline")}
+              onMouseOut={(e) => (e.target.style.textDecoration = "none")}
+            >
+              {r.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <button className="btn" onClick={addResource} style={{ marginTop: "8px" }}>
+        + Add Resource
+      </button>
+    </div>
+  );
+}
+
+// === Main App ===
+export default function App() {
+  const [active, setActive] = useState("performance");
+
+  return (
+    <div className="container">
+      <header className="header">
+        <h1>TechAI Assistant</h1>
+        <nav className="tabs">
+          <button className={active === "performance" ? "active" : ""} onClick={() => setActive("performance")}>
+            Performance
+          </button>
+          <button className={active === "repair" ? "active" : ""} onClick={() => setActive("repair")}>
+            Repair Videos
+          </button>
+          <button className={active === "chat" ? "active" : ""} onClick={() => setActive("chat")}>
+            Chat
+          </button>
+          <button className={active === "admin" ? "active" : ""} onClick={() => setActive("admin")}>
+            Admin
+          </button>
+          <button className={active === "resources" ? "active" : ""} onClick={() => setActive("resources")}>
+            Resources
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        {active === "performance" && <EfficiencyWidget />}
+        {active === "repair" && (
+          <div className="card">
+            <h3>Repair Videos</h3>
+            <p>Coming soon: curated repair tutorials and guides.</p>
           </div>
         )}
-
-        {active==='diagnostics' && <div className="card"><h3>Search</h3><p className="small">VIN, DTC, and service info.</p></div>}
-        {active==='resources' && <div className="card"><h3>Resource Links</h3><p className="small">Third-party repair videos and training.</p></div>}
-        {active==='multipoint' && <div className="card"><h3>Multipoint Inspection</h3><p className="small">Checklist items.</p></div>}
-
-        <div style={{marginTop:12}}><h4 style={{marginBottom:8}}>Assistant</h4><Chat /></div>
-      </div>
-      <div className="footer">TechAI Assistant</div>
-      <div className="admin-link"><a href="#admin" onClick={(e)=>{e.preventDefault(); const code=prompt('Enter admin quick code'); if(code==='admin-secret') location.hash='admin'; }}>Admin</a></div>
-      {location.hash==='admin' && <div style={{position:'fixed',top:40,left:10,right:10,zIndex:60}}><Admin /></div>}
+        {active === "chat" && <Chat />}
+        {active === "admin" && <Admin />}
+        {active === "resources" && <Resources />}
+      </main>
     </div>
-  )
+  );
 }
